@@ -1,4 +1,4 @@
-use std::fs::read_to_string;
+use std::{fs::read_to_string, collections::BTreeSet};
 use nalgebra::{DMatrix, Matrix, VecStorage, Dyn};
 
 type GalaxyMatrix = Matrix<String, Dyn, Dyn, VecStorage<String, Dyn, Dyn>>;
@@ -50,6 +50,11 @@ fn get_shortest_path(a: (i32, i32), b: (i32, i32)) -> i32 {
     (a.0 - b.0).abs() + (a.1 - b.1).abs()
 }
 
+fn get_shortest_path_with_offsets(a: (i32, i32), b: (i32, i32), row_offsets: &Vec<i32>, col_offsets: &Vec<i32>) -> i32 {
+    ((a.0 + row_offsets.get(a.0 as usize).unwrap()) - (b.0 + row_offsets.get(b.0 as usize).unwrap())).abs() + 
+    ((a.1 + col_offsets.get(a.1 as usize).unwrap()) - (b.1 + col_offsets.get(b.1 as usize).unwrap())).abs()
+}
+
 fn solution(filename: &str, expand_factor: usize) -> i32 {
     let matrix = expand_matrix(get_matrix(filename), expand_factor);
     let galaxies = get_galaxies(matrix);
@@ -62,10 +67,58 @@ fn solution(filename: &str, expand_factor: usize) -> i32 {
     sum
 }
 
+fn quick_solution(filename: &str, expand_factor: usize) -> i32 {
+    let matrix = get_matrix(filename);
+    let nrows = matrix.nrows() as i32;
+    let ncols = matrix.ncols() as i32;
+    let galaxies = get_galaxies(matrix);
+
+    let mut row_set = BTreeSet::new();
+    let mut col_set = BTreeSet::new();
+    for i in 0..nrows {
+        row_set.insert(i);
+    }
+    for i in 0..ncols {
+        col_set.insert(i);
+    }
+    for galaxy in galaxies.iter() {
+        row_set.remove(&galaxy.0);
+        col_set.remove(&galaxy.1);
+    }
+    let mut row_offsets = Vec::from_iter(0..nrows);
+    let mut col_offsets = Vec::from_iter(0..ncols);
+    let mut offset = 0;
+    for row in row_offsets.iter_mut() {
+        *row = offset;
+        if row_set.contains(row) {
+            offset += expand_factor as i32 - 1;
+        }
+    }
+    let mut offset = 0;
+    for col in col_offsets.iter_mut() {
+        *col = offset;
+        if col_set.contains(col) {
+            offset += expand_factor as i32 - 1;
+        }
+    }
+
+    let mut sum = 0;
+    for (i, galaxy) in galaxies.iter().enumerate() {
+        for other_galaxy in galaxies.iter().skip(i + 1) {
+            sum += get_shortest_path_with_offsets(*galaxy, *other_galaxy, &row_offsets, &col_offsets);
+        }
+    }
+    sum
+}
+
 fn main() {
     assert_eq!(solution("example.txt", 2), 374);
     assert_eq!(solution("input.txt", 2), 9556896); 
     assert_eq!(solution("example.txt", 10), 1030);
     assert_eq!(solution("example.txt", 100), 8410);
-    // assert_eq!(solution("input.txt", 1000000), 0); 
+    assert_eq!(quick_solution("example.txt", 2), 374);
+    assert_eq!(quick_solution("input.txt", 2), 9556896); 
+    assert_eq!(quick_solution("example.txt", 10), 1030);
+    assert_eq!(quick_solution("example.txt", 100), 8410);
+    assert_eq!(quick_solution("input.txt", 1000000), 0); 
 }
