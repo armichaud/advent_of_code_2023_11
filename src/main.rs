@@ -11,7 +11,7 @@ fn get_matrix(filename: &str) -> GalaxyMatrix {
     DMatrix::from_iterator(rows, cols, rows_list.concat().chars().map(|x| x.to_string()))
 }
 
-fn expand_matrix(matrix: GalaxyMatrix) -> GalaxyMatrix {
+fn expand_matrix(matrix: GalaxyMatrix, expand_factor: usize) -> GalaxyMatrix {
     let mut rows_to_insert = Vec::new();
     for (i, row) in matrix.row_iter().enumerate() {
         if row.iter().all(|x| x == ".") {
@@ -20,7 +20,7 @@ fn expand_matrix(matrix: GalaxyMatrix) -> GalaxyMatrix {
     }
     let mut matrix = matrix;
     for row in rows_to_insert.iter().rev() {
-       matrix = matrix.insert_rows(row + 1, 1, ".".to_owned());
+       matrix = matrix.insert_rows(row + 1, expand_factor - 1, ".".to_owned());
     }
     let mut cols_to_insert = Vec::new();
     for (i, col) in matrix.column_iter().enumerate() {
@@ -29,7 +29,7 @@ fn expand_matrix(matrix: GalaxyMatrix) -> GalaxyMatrix {
         }
     }
     for col in cols_to_insert.iter().rev() {
-       matrix = matrix.insert_columns(col + 1, 1, ".".to_owned());
+       matrix = matrix.insert_columns(col + 1, expand_factor - 1, ".".to_owned());
     }
     matrix
 }
@@ -50,8 +50,8 @@ fn get_shortest_path(a: (i32, i32), b: (i32, i32)) -> i32 {
     (a.0 - b.0).abs() + (a.1 - b.1).abs()
 }
 
-fn solution(filename: &str) -> i32 {
-    let matrix = expand_matrix(get_matrix(filename));
+fn solution(filename: &str, expand_factor: usize) -> i32 {
+    let matrix = expand_matrix(get_matrix(filename), expand_factor);
     let galaxies = get_galaxies(matrix);
     let mut sum = 0;
     for (i, galaxy) in galaxies.iter().enumerate() {
@@ -63,9 +63,9 @@ fn solution(filename: &str) -> i32 {
 }
 
 fn main() {
-    assert_eq!(solution("example.txt"), 374);
-    assert_eq!(solution("input.txt"), 9556896); 
-    // assert_eq!(solution("example.txt", 10), 1030);
-    // assert_eq!(solution("example.txt", 100), 8410);
+    assert_eq!(solution("example.txt", 2), 374);
+    assert_eq!(solution("input.txt", 2), 9556896); 
+    assert_eq!(solution("example.txt", 10), 1030);
+    assert_eq!(solution("example.txt", 100), 8410);
     // assert_eq!(solution("input.txt", 1000000), 0); 
 }
