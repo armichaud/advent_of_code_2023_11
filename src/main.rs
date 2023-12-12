@@ -8,8 +8,7 @@ fn get_matrix(filename: &str) -> GalaxyMatrix {
     let rows_list= contents.lines().collect::<Vec<&str>>();
     let rows = rows_list.len();
     let cols = rows_list[0].len();
-    let flattened = rows_list.concat().chars().map(|x| x.to_string()).collect::<Vec<String>>();
-    DMatrix::from_vec(rows, cols, flattened)
+    DMatrix::from_iterator(rows, cols, rows_list.concat().chars().map(|x| x.to_string()))
 }
 
 fn expand_matrix(matrix: GalaxyMatrix) -> GalaxyMatrix {
@@ -19,10 +18,18 @@ fn expand_matrix(matrix: GalaxyMatrix) -> GalaxyMatrix {
             rows_to_insert.push(i);
         }
     }
-    // TODO this is not working
-    for &row in rows_to_insert.iter().rev() {
-        let matrix = matrix.clone();
-        matrix.insert_rows(row + 1, 1, ".".to_owned());
+    let mut matrix = matrix;
+    for row in rows_to_insert.iter().rev() {
+       matrix = matrix.insert_row(row + 1, ".".to_owned());
+    }
+    let mut cols_to_insert = Vec::new();
+    for (i, col) in matrix.column_iter().enumerate() {
+        if col.iter().all(|x| x == ".") {
+            cols_to_insert.push(i);
+        }
+    }
+    for col in cols_to_insert.iter().rev() {
+       matrix = matrix.insert_column(col + 1, ".".to_owned());
     }
     matrix
 }
