@@ -34,28 +34,28 @@ fn expand_matrix(matrix: GalaxyMatrix, expand_factor: usize) -> GalaxyMatrix {
     matrix
 }
 
-fn get_galaxies(matrix: GalaxyMatrix) -> Vec<(i32, i32)> {
+fn get_galaxies(matrix: GalaxyMatrix) -> Vec<(i64, i64)> {
     let mut galaxies = Vec::new();
     for (i, row) in matrix.row_iter().enumerate() {
         for (j, cell) in row.iter().enumerate() {
             if cell == "#" {
-                galaxies.push((i as i32, j as i32));
+                galaxies.push((i as i64, j as i64));
             }
         }
     }
     galaxies
 }
 
-fn get_shortest_path(a: (i32, i32), b: (i32, i32)) -> i32 {
+fn get_shortest_path(a: (i64, i64), b: (i64, i64)) -> i64 {
     (a.0 - b.0).abs() + (a.1 - b.1).abs()
 }
 
-fn get_shortest_path_with_offsets(a: (i32, i32), b: (i32, i32), row_offsets: &Vec<i32>, col_offsets: &Vec<i32>) -> i32 {
+fn get_shortest_path_with_offsets(a: (i64, i64), b: (i64, i64), row_offsets: &Vec<i64>, col_offsets: &Vec<i64>) -> i64 {
     ((a.0 + row_offsets.get(a.0 as usize).unwrap()) - (b.0 + row_offsets.get(b.0 as usize).unwrap())).abs() + 
     ((a.1 + col_offsets.get(a.1 as usize).unwrap()) - (b.1 + col_offsets.get(b.1 as usize).unwrap())).abs()
 }
 
-fn solution(filename: &str, expand_factor: usize) -> i32 {
+fn solution(filename: &str, expand_factor: usize) -> i64 {
     let matrix = expand_matrix(get_matrix(filename), expand_factor);
     let galaxies = get_galaxies(matrix);
     let mut sum = 0;
@@ -67,10 +67,10 @@ fn solution(filename: &str, expand_factor: usize) -> i32 {
     sum
 }
 
-fn quick_solution(filename: &str, expand_factor: usize) -> i32 {
+fn quick_solution(filename: &str, expand_factor: usize) -> i64 {
     let matrix = get_matrix(filename);
-    let nrows = matrix.nrows() as i32;
-    let ncols = matrix.ncols() as i32;
+    let nrows = matrix.nrows() as i64;
+    let ncols = matrix.ncols() as i64;
     let galaxies = get_galaxies(matrix);
 
     let mut row_set = BTreeSet::new();
@@ -85,20 +85,21 @@ fn quick_solution(filename: &str, expand_factor: usize) -> i32 {
         row_set.remove(&galaxy.0);
         col_set.remove(&galaxy.1);
     }
-    let mut row_offsets = Vec::from_iter(0..nrows);
-    let mut col_offsets = Vec::from_iter(0..ncols);
+
+    let mut row_offsets = Vec::new();
+    let mut col_offsets = Vec::new();
     let mut offset = 0;
-    for row in row_offsets.iter_mut() {
-        *row = offset;
-        if row_set.contains(row) {
-            offset += expand_factor as i32 - 1;
+    for row in 0..nrows {
+        row_offsets.push(offset);
+        if row_set.contains(&row) {
+            offset += expand_factor as i64 - 1;
         }
     }
     let mut offset = 0;
-    for col in col_offsets.iter_mut() {
-        *col = offset;
-        if col_set.contains(col) {
-            offset += expand_factor as i32 - 1;
+    for col in  0..ncols {
+        col_offsets.push(offset);
+        if col_set.contains(&col) {
+            offset += expand_factor as i64 - 1;
         }
     }
 
@@ -120,5 +121,5 @@ fn main() {
     assert_eq!(quick_solution("input.txt", 2), 9556896); 
     assert_eq!(quick_solution("example.txt", 10), 1030);
     assert_eq!(quick_solution("example.txt", 100), 8410);
-    assert_eq!(quick_solution("input.txt", 1000000), 0); 
+    assert_eq!(quick_solution("input.txt", 1000000), 685038186836); 
 }
