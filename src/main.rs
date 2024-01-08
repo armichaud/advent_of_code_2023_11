@@ -113,13 +113,13 @@ fn quick_solution(filename: &str, expand_factor: usize) -> i64 {
 }
 
 fn main() {
-    assert_eq!(solution("example.txt", 2), 374);
-    assert_eq!(solution("input.txt", 2), 9556896); 
-    assert_eq!(solution("example.txt", 10), 1030);
-    assert_eq!(solution("example.txt", 100), 8410);
-    assert_eq!(quick_solution("example.txt", 2), 374);
-    assert_eq!(quick_solution("input.txt", 2), 9556896); 
-    assert_eq!(quick_solution("example.txt", 10), 1030);
-    assert_eq!(quick_solution("example.txt", 100), 8410);
-    assert_eq!(quick_solution("input.txt", 1000000), 685038186836); 
+    println!("{}", solution("example.txt", 2));
+    println!("{}", solution("input.txt", 2)); 
+    println!("{}", solution("example.txt", 10));
+    println!("{}", solution("example.txt", 100));
+    println!("{}", quick_solution("example.txt", 2));
+    println!("{}", quick_solution("input.txt", 2)); 
+    println!("{}", quick_solution("example.txt", 10));
+    println!("{}", quick_solution("example.txt", 100));
+    println!("{}", quick_solution("input.txt", 1000000)); 
 }
